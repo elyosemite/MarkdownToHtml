@@ -6,16 +6,24 @@ let parseLine (line: string): MarkdownElement option =
         Some (Heading (1, line.Substring(2).Trim()))
     elif line.StartsWith("## ") then
         Some (Heading (2, line.Substring(3).Trim()))
-    elif line.StartsWith("**") && line.EndsWith("**") then
-        Some (Bold (line.Substring(2, line.Length - 4).Trim()))
-    elif line.StartsWith("*") && line.EndsWith("*") then
-        Some (Italic (line.Substring(1, line.Length - 2).Trim()))
-    elif line.StartsWith("~~") && line.EndsWith("~~") then
-        Some (Strikethrough (line.Substring(2, line.Length - 4).Trim()))
-    elif not (String.IsNullOrWhiteSpace(line)) then
-        Some (Paragraph (line.Trim()))
+    elif line.StartsWith("### ") then
+        Some (Heading (3, line.Substring(4).Trim()))
+    elif String.IsNullOrWhiteSpace(line) then
+        None
     else
         None
+
+let parseMarkdown (lines: string list): MarkdownElement list =
+    lines
+    |> List.choose parseLine
+
+let renderHtml (element: MarkdownElement): string =
+    match element with
+    | Paragraph text -> sprintf "<p>%s</p>" text
+    | Heading (level, text) -> sprintf "<h%d>%s</h%d>" level text level
+    | Bold text -> sprintf "<strong>%s</strong>" text
+    | Italic text -> sprintf "<em>%s</em>" text
+    | Strikethrough text -> sprintf "<del>%s</del>" text
 
 [<EntryPoint>]
 let main argv = 
